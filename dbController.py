@@ -35,20 +35,3 @@ cursor.execute('''
 );
 ''')
 connect.commit()
-
-
-# cursor.execute('''DELETE FROM users ''')
-# connect.commit()
-# cursor.execute('''DELETE FROM links ''')
-# connect.commit()
-#
-# cursor.execute('''INSERT INTO users('login', 'password') VALUES('1', '1')''')
-# connect.commit()
-
-
-# cursor.execute('''INSERT INTO links_types('type') VALUES('pub')''')
-# connect.commit()
-# cursor.execute('''INSERT INTO links_types('type') VALUES('obsh')''')
-# connect.commit()
-# cursor.execute('''INSERT INTO links_types('type') VALUES('priv')''')
-# connect.commit()
