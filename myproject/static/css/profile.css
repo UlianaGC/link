@@ -6,7 +6,6 @@ font-family: 'Nunito', sans-serif;
 
 a{
 text-decoration: none;
-
 transition: color 0.3s ease-in-out;
 }
 
@@ -22,7 +21,7 @@ a:hover{
 color: #ff0081;
 }
 
-form{
+.logout{
 width: 400px;
 display: flex;
 justify-content: center;
@@ -40,4 +39,57 @@ background-color: #ff0081;
 box-shadow: 0 2px 17px rgba(255, 0, 130, 0.5);
 color: white;
 cursor: pointer;
+}
+
+table{
+width: 1250px;
+margin: 0 auto;
+background: #1f2739;
+border-collapse: collapse;
+border: 2px solid white;
+text-align: center;
+color: white;
+}
+
+th{
+background: #1f2739;
+}
+
+tr{
+background: #323c50;
+}
+
+tr:nth-child(2n+1){
+background: #2c3446;
+}
+
+table a {
+color: white;
+}
+
+.button{
+display: flex;
+margin-left: 135px;
+gap: 20px;
+}
+
+.th{
+height: 70px;
+color: #185875;
+}
+
+input, select{
+padding: 5px 10px;
+}
+
+.update_form{
+width: 400px;
+gap: 20px;
+display: flex;
+flex-direction: column;
+margin: 50px auto;
+}
+
+.none{
+display: none;
 }
