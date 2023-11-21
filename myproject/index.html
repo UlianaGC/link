@@ -38,11 +38,11 @@
         <div class="input">
             <input class="input_link" id="psev" type="text" name="psev" placeholder=" ">
             <label class="label" for="psev">Введите псевдоним</label></div>
-        {%if session['user_login']==None%}
-            <input type="submit" value="Сократить" disabled>
-        <p class="p_log_in">Для сокращения ссылки необходимо войти</p>
-        {%else%}
+        {%if 'user_login' in session and session['user_login'] != None%}
         <input type="submit" value="Сократить">
+        {%else%}
+        <input type="submit" value="Сократить" disabled>
+        <p class="p_log_in">Для сокращения ссылки необходимо войти</p>
         {%endif%}
         {% for msg in get_flashed_messages() %}
             <a href="{{msg}}">{{msg}}</a>

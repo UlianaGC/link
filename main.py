@@ -16,7 +16,6 @@ menu = [
             {"name": "Авторизация", "url": "auth"},
             {"name": "Регистрация", "url": "reg"}
         ]
-
 @app.route('/insert', methods=['POST'])
 def insert():
     connect = sqlite3.connect('db.db', check_same_thread=False)
