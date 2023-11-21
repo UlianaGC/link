@@ -20,8 +20,6 @@ cursor.execute('''
 );
 ''')
 
-# cursor.execute("""delete from links""")
-
 cursor.execute('''
  CREATE TABLE IF NOT EXISTS "links" (
 	"id"	INTEGER,

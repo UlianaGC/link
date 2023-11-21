@@ -36,7 +36,7 @@ def insert():
         if 'user_login' in session and session['user_login'] != None:
             menu = [
                 {"name": "Главная", "url": "/"},
-                {"name": 'Профиль', "url": "profile"},
+                {"name": session['user_login'], "url": "profile"},
             ]
         else:
             menu = [
@@ -54,9 +54,9 @@ def check():
     hash = hashlib.md5(request.form["password"].encode())
     password = hash.hexdigest()
     menu = [
-        {"name": "Главная", "url": "/"},
-        {"name": "Авторизация", "url": "auth"},
-        {"name": "Регистрация", "url": "reg"}
+            {"name": "Главная", "url": "/"},
+            {"name": "Авторизация", "url": "auth"},
+            {"name": "Регистрация", "url": "reg"}
     ]
     if user != None:
         if password == user[2]:
@@ -65,7 +65,7 @@ def check():
             hrefs = cursor.execute('''SELECT * FROM 'links' WHERE user_id = ?''', (session['user_id'],)).fetchall()
             menu = [
                 {"name": "Главная", "url": "/"},
-                {"name": 'Профиль', "url": "profile"},
+                {"name": session['user_login'], "url": "profile"},
             ]
             if 'href' in session and session['href'] != None:
                 if session['href'][6] == 2:
@@ -107,24 +107,29 @@ def check():
                 link_table = cursor.execute('''select * from links inner join links_types on links.link_type_id=links_types.id where user_id=?''',(session['user_id'],)).fetchall()
                 return render_template('profile.html', title="Профиль", menu=menu, hrefs=hrefs, type=type, baselink=request.host_url, link_table=link_table)
         else:
-            flask.flash('Неправильный пароль')
             return render_template('auth.html', title="Авторизация", menu=menu)
     else:
-        flask.flash('Вас нет в базе')
         return render_template('auth.html', title="Авторизация", menu=menu)
 
 
 @app.route("/")
 def index():
-    if 'user_login' in session and session['user_login'] != None:
-        menu = [
-            {"name": "Главная", "url": "/"},
-            {"name": 'Профиль', "url": "profile"},
-        ]
+    if session['href']==None:
+        if 'user_login' in session and session['user_login'] != None:
+            menu = [
+                {"name": "Главная", "url": "/"},
+                {"name": session['user_login'], "url": "profile"},
+            ]
+        else:
+            menu = [
+                {"name": "Главная", "url": "/"},
+                {"name": "Авторизация", "url": "auth"},
+                {"name": "Регистрация", "url": "reg"}
+            ]
     else:
         menu = [
             {"name": "Главная", "url": "/"},
-            {"name": "Авторизация", "url": "auth"},
+            {"name": "Авторизация", "url": f"/href/{session['href'][2]}"},
             {"name": "Регистрация", "url": "reg"}
         ]
     return render_template('index.html', title="Главная", menu=menu)
@@ -141,18 +146,25 @@ def auth():
 
 @app.route("/reg")
 def reg():
-    menu = [
+    if session['href']==None:
+        menu = [
+                {"name": "Главная", "url": "/"},
+                {"name": "Авторизация", "url": "auth"},
+                {"name": "Регистрация", "url": "reg"}
+        ]
+    else:
+        menu = [
             {"name": "Главная", "url": "/"},
-            {"name": "Авторизация", "url": "auth"},
+            {"name": "Авторизация", "url": f"/href/{session['href'][2]}"},
             {"name": "Регистрация", "url": "reg"}
-    ]
+        ]
     return render_template('registration.html', title="Регистрация", menu=menu)
 
 @app.route("/profile")
 def profile():
     menu = [
         {"name": "Главная", "url": "/"},
-        {"name": 'Профиль', "url": "profile"},
+        {"name": session['user_login'], "url": "profile"},
     ]
     connect = sqlite3.connect('db.db', check_same_thread=False)
     cursor = connect.cursor()
@@ -160,11 +172,11 @@ def profile():
     return render_template('profile.html', title="Профиль", menu=menu, link_table=link_table, baselink=request.host_url)
 
 @app.route("/reduce", methods=['POST'])
-def short():
+def reduce():
     if 'user_login' in session and session['user_login'] !=None:
         menu = [
             {"name": "Главная", "url": "/"},
-            {"name": 'Профиль', "url": "profile"},
+            {"name": session['user_login'], "url": "profile"},
         ]
     else:
         menu = [
@@ -187,7 +199,6 @@ def short():
             cursor.execute('''INSERT INTO links('link', 'hreflink', 'user_id', 'link_type_id', 'count') VALUES(?, ?, ?, ?, ?)''',(request.form['href'], user_address, session['user_id'], request.form['link'],0))
             connect.commit()
             baselink23 = request.host_url + 'href/' + user_address
-
             flask.flash(f'{baselink23}')
             return render_template('index.html', title="Главная", menu=menu, )
         else:
@@ -209,13 +220,23 @@ def short():
         cursor.execute('''INSERT INTO links('link', 'hreflink', 'user_id', 'link_type_id', 'count') VALUES(?, ?, ?, ?, ?)''',(request.form['href'], user_address, session['user_id'], request.form['link'], 0))
         connect.commit()
         baselink23 = request.host_url + 'href/' + user_address
-
         flask.flash(f'{baselink23}')
         return render_template('index.html', title="Главная", menu=menu, )
 
+# connect = sqlite3.connect('db.db')
+# cursor = connect.cursor()
+# rep_link = cursor.execute('''select link from links where link=?''', (request.form['href'],)).fetchall()
+# if 'user_login' in session and session['user_login'] !=None:
+#     if rep_link==[]:
+#         reduce()
+#     else:
+#         print('такая ссылка уже использовалась')
+# else:
+#     print('!!!!')
+
 
 @app.route("/href/<hashref>")
-def direct(hashref):
+def r_direct(hashref):
     connect = sqlite3.connect('db.db')
     cursor = connect.cursor()
     href = cursor.execute('''SELECT * FROM links INNER JOIN links_types ON links_types.id = links.link_type_id WHERE hreflink = ?''', (hashref, ) ).fetchone()
@@ -231,12 +252,13 @@ def direct(hashref):
         else:
             session['href'] = href
             menu = [
-                {"name": "Авторизация", "url": "auth"},
-                {"name": "Регистрация", "url": "reg"}
+                {"name": "Главная", "url": "/"},
+                {"name": "Авторизация", "url": "/auth"},
+                {"name": "Регистрация", "url": "/reg"}
             ]
-            return render_template('avto.html', title="Авторизация", menu=menu)
+            return render_template('auth.html', title="Авторизация", menu=menu)
 
-    elif href[7]=='Приватня':
+    elif href[7]=='Приватная':
         if 'user_id' in session and session['user_id'] != None:
             if (href[3]==session['user_id']):
                 cursor.execute('''UPDATE links SET count = ? WHERE id=?''', (href[5] + 1, href[0]))
@@ -247,8 +269,9 @@ def direct(hashref):
         else:
             session['href'] = href
             menu = [
-                {"name": "Авторизация", "url": "auth"},
-                {"name": "Регистрация", "url": "reg"}
+                {"name": "Главная", "url": "/"},
+                {"name": "Авторизация", "url": "/auth"},
+                {"name": "Регистрация", "url": "/reg"}
             ]
             return render_template('auth.html', title="Авторизация", menu=menu)
 
@@ -276,11 +299,11 @@ def delete():
 def update():
     menu = [
             {"name": "Главная", "url": "/"},
-            {"name": 'Профиль', "url": "profile"},
+            {"name": session['user_login'], "url": "profile"},
     ]
     connect = sqlite3.connect('db.db')
     cursor = connect.cursor()
-    href = cursor.execute('''select id, hreflink from links where id=?''', (request.form['update'], )).fetchone()
+    href = cursor.execute('''select id, hreflink, link from links where id=?''', (request.form['update'], )).fetchone()
     return render_template('update.html', title="Изменение", menu=menu, href=href)
 
 @app.route("/save", methods=['POST'])
@@ -289,16 +312,28 @@ def save():
     cursor = connect.cursor()
     menu = [
         {"name": "Главная", "url": "/"},
-        {"name": 'Профиль', "url": "profile"},
+        {"name": session['user_login'], "url": "profile"},
     ]
-    if request.form['select']=='0':
-        cursor.execute('''UPDATE links SET hreflink = ? WHERE id = ?''', (request.form["psev"],request.form["id"]))
+
+    if request.form['psev']!='':
+        psev = cursor.execute('''select * from links where hreflink=?''', (request.form['psev'], )).fetchone()
+        if psev==None:
+            user_address=request.form['psev']
+        else:
+            user_address = hashlib.md5(request.form['psev'].encode()).hexdigest()[:random.randint(8, 12)]
+    else:
+        user_address = hashlib.md5(request.form['href'].encode()).hexdigest()[:random.randint(8, 12)]
+
+    if request.form['select'] == '0':
+        cursor.execute('''UPDATE links SET hreflink = ? WHERE id = ?''', (user_address, request.form["id"]))
         connect.commit()
     else:
-        cursor.execute('''UPDATE links SET hreflink = ?, link_type_id=? WHERE id = ?''', (request.form["psev"],request.form["select"], request.form["id"]))
+        cursor.execute('''UPDATE links SET hreflink = ?, link_type_id=? WHERE id = ?''',(user_address, request.form["select"], request.form["id"]))
         connect.commit()
+
     href = cursor.execute('''SELECT * FROM 'links' INNER JOIN links_types ON links_types.id = links.link_type_id  WHERE user_id = ?''',(session['user_id'],)).fetchall()
     link_table = cursor.execute('''select * from links inner join links_types on links.link_type_id=links_types.id where user_id=?''',(session['user_id'],)).fetchall()
-    return render_template('profile.html', title="Профиль", menu=menu, href=href, type=type, baselink=request.host_url, link_table=link_table)
+    return render_template('profile.html', title="Профиль", menu=menu, href=href, type=type, baselink=request.host_url, link_table=link_table,)
+
 if __name__=='__main__':
     app.run(debug=True)
