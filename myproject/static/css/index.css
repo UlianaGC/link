@@ -28,7 +28,7 @@ form{
     gap: 30px;
     box-shadow: -1px 3px 10px #DCDCDC;
     margin: 50px auto;
-    padding: 35px 100px 70px;
+    padding: 35px 100px 40px;
     border-radius: 10px;
     text-align: center;
 }
@@ -75,4 +75,15 @@ background-color: #ff0081;
 box-shadow: 0 2px 10px rgba(255, 0, 130, 0.5);
 color: white;
 cursor: pointer;
+}
+
+input[type='submit']:disabled{
+background-color: gray;
+box-shadow: none;
+}
+
+.p_log_in{
+font-size: 12px;
+margin-top: -25px;
+color: gray;
 }

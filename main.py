@@ -53,11 +53,17 @@ def check():
     user = cursor.execute('''SELECT * FROM 'users' WHERE login = ?''', (request.form["login"],)).fetchone()
     hash = hashlib.md5(request.form["password"].encode())
     password = hash.hexdigest()
+    # if session['href']==None:
     menu = [
-            {"name": "Главная", "url": "/"},
-            {"name": "Авторизация", "url": "auth"},
-            {"name": "Регистрация", "url": "reg"}
+                {"name": "Главная", "url": "/"},
+                {"name": "Авторизация", "url": "auth"},
+                {"name": "Регистрация", "url": "reg"}
     ]
+    # else:
+    #     menu = [
+    #         {"name": "Авторизация", "url": "/auth"},
+    #         {"name": "Регистрация", "url": f"/href/{session['href'][2]}"}
+    #     ]
     if user != None:
         if password == user[2]:
             session['user_login'] = user[1]
@@ -114,7 +120,6 @@ def check():
 
 @app.route("/")
 def index():
-    if session['href']==None:
         if 'user_login' in session and session['user_login'] != None:
             menu = [
                 {"name": "Главная", "url": "/"},
@@ -126,13 +131,7 @@ def index():
                 {"name": "Авторизация", "url": "auth"},
                 {"name": "Регистрация", "url": "reg"}
             ]
-    else:
-        menu = [
-            {"name": "Главная", "url": "/"},
-            {"name": "Авторизация", "url": f"/href/{session['href'][2]}"},
-            {"name": "Регистрация", "url": "reg"}
-        ]
-    return render_template('index.html', title="Главная", menu=menu)
+        return render_template('index.html', title="Главная", menu=menu)
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -146,19 +145,18 @@ def auth():
 
 @app.route("/reg")
 def reg():
-    if session['href']==None:
+    # if session['href']==None:
         menu = [
                 {"name": "Главная", "url": "/"},
                 {"name": "Авторизация", "url": "auth"},
                 {"name": "Регистрация", "url": "reg"}
         ]
-    else:
-        menu = [
-            {"name": "Главная", "url": "/"},
-            {"name": "Авторизация", "url": f"/href/{session['href'][2]}"},
-            {"name": "Регистрация", "url": "reg"}
-        ]
-    return render_template('registration.html', title="Регистрация", menu=menu)
+    # else:
+    #     menu = [
+    #         {"name": "Авторизация", "url": f"/href/{session['href'][2]}"},
+    #         {"name": "Регистрация", "url": "/reg"}
+    #     ]
+        return render_template('registration.html', title="Регистрация", menu=menu)
 
 @app.route("/profile")
 def profile():
@@ -223,17 +221,6 @@ def reduce():
         flask.flash(f'{baselink23}')
         return render_template('index.html', title="Главная", menu=menu, )
 
-# connect = sqlite3.connect('db.db')
-# cursor = connect.cursor()
-# rep_link = cursor.execute('''select link from links where link=?''', (request.form['href'],)).fetchall()
-# if 'user_login' in session and session['user_login'] !=None:
-#     if rep_link==[]:
-#         reduce()
-#     else:
-#         print('такая ссылка уже использовалась')
-# else:
-#     print('!!!!')
-
 
 @app.route("/href/<hashref>")
 def r_direct(hashref):
@@ -252,7 +239,7 @@ def r_direct(hashref):
         else:
             session['href'] = href
             menu = [
-                {"name": "Главная", "url": "/"},
+                # {"name": "Главная", "url": "/"},
                 {"name": "Авторизация", "url": "/auth"},
                 {"name": "Регистрация", "url": "/reg"}
             ]
@@ -269,7 +256,7 @@ def r_direct(hashref):
         else:
             session['href'] = href
             menu = [
-                {"name": "Главная", "url": "/"},
+                # {"name": "Главная", "url": "/"},
                 {"name": "Авторизация", "url": "/auth"},
                 {"name": "Регистрация", "url": "/reg"}
             ]
@@ -314,13 +301,13 @@ def save():
         {"name": "Главная", "url": "/"},
         {"name": session['user_login'], "url": "profile"},
     ]
-
     if request.form['psev']!='':
-        psev = cursor.execute('''select * from links where hreflink=?''', (request.form['psev'], )).fetchone()
-        if psev==None:
+        # print(request.form['psev'])
+        # psev = cursor.execute('''select * from links where hreflink=?''', (request.form['psev'], )).fetchone()
+        # if psev==None:
             user_address=request.form['psev']
-        else:
-            user_address = hashlib.md5(request.form['psev'].encode()).hexdigest()[:random.randint(8, 12)]
+        # else:
+        #     user_address = hashlib.md5(request.form['psev'].encode()).hexdigest()[:random.randint(8, 12)]
     else:
         user_address = hashlib.md5(request.form['href'].encode()).hexdigest()[:random.randint(8, 12)]
 
