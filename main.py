@@ -220,46 +220,48 @@ def reduce():
         flask.flash(f'{baselink23}')
         return render_template('index.html', title="Главная", menu=menu, )
 
-
 @app.route("/href/<hashref>")
 def r_direct(hashref):
     connect = sqlite3.connect('db.db')
     cursor = connect.cursor()
     href = cursor.execute('''SELECT * FROM links INNER JOIN links_types ON links_types.id = links.link_type_id WHERE hreflink = ?''', (hashref, ) ).fetchone()
-    if href[7]=='Публичная':
-        cursor.execute('''UPDATE links SET count = ? WHERE id=?''',(href[5]+1, href[0]))
-        connect.commit()
-        return redirect(f"{href[1]}")
-    elif href[7]=='Общая':
-        if 'user_id' in session and session['user_id']!=None:
-            cursor.execute('''UPDATE links SET count = ? WHERE id=?''', (href[5] + 1, href[0]))
+    if(href!=None):
+        if href[7]=='Публичная':
+            cursor.execute('''UPDATE links SET count = ? WHERE id=?''',(href[5]+1, href[0]))
             connect.commit()
             return redirect(f"{href[1]}")
-        else:
-            session['href'] = href
-            menu = [
-                # {"name": "Главная", "url": "/"},
-                {"name": "Авторизация", "url": "/auth"},
-                {"name": "Регистрация", "url": "/reg"}
-            ]
-            return render_template('auth.html', title="Авторизация", menu=menu)
-
-    elif href[7]=='Приватная':
-        if 'user_id' in session and session['user_id'] != None:
-            if (href[3]==session['user_id']):
+        elif href[7]=='Общая':
+            if 'user_id' in session and session['user_id']!=None:
                 cursor.execute('''UPDATE links SET count = ? WHERE id=?''', (href[5] + 1, href[0]))
                 connect.commit()
                 return redirect(f"{href[1]}")
             else:
-                return ('Нет доступа')
-        else:
-            session['href'] = href
-            menu = [
-                # {"name": "Главная", "url": "/"},
-                {"name": "Авторизация", "url": "/auth"},
-                {"name": "Регистрация", "url": "/reg"}
-            ]
-            return render_template('auth.html', title="Авторизация", menu=menu)
+                session['href'] = href
+                menu = [
+                    # {"name": "Главная", "url": "/"},
+                    {"name": "Авторизация", "url": "/auth"},
+                    {"name": "Регистрация", "url": "/reg"}
+                ]
+                return render_template('auth.html', title="Авторизация", menu=menu)
+
+        elif href[7]=='Приватная':
+            if 'user_id' in session and session['user_id'] != None:
+                if (href[3]==session['user_id']):
+                    cursor.execute('''UPDATE links SET count = ? WHERE id=?''', (href[5] + 1, href[0]))
+                    connect.commit()
+                    return redirect(f"{href[1]}")
+                else:
+                    return ('Нет доступа')
+            else:
+                session['href'] = href
+                menu = [
+                    # {"name": "Главная", "url": "/"},
+                    {"name": "Авторизация", "url": "/auth"},
+                    {"name": "Регистрация", "url": "/reg"}
+                ]
+                return render_template('auth.html', title="Авторизация", menu=menu)
+    else:
+        return render_template('del.html')
 
 @app.route("/delete", methods=['POST'])
 def delete():
